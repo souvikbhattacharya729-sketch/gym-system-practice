@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IronForge Athletics | Elite Training System</title>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Inter:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --primary: #ef4444;
+            /* Aggressive Red */
+            --primary-hover: #dc2626;
+            --dark-bg: #0f1014;
+            --panel-bg: #18181b;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #27272a;
+            --success: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+            padding-bottom: 50px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Teko', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background: rgba(15, 16, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 2rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .logo span {
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            color: var(--primary);
+        }
+
+        /* Utility to hide/show views */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.6s ease;
+            padding: 20px 5%;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- UI COMPONENTS --- */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 4px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        /* --- VIEW 1: HOME & ADMISSION --- */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            min-height: 80vh;
+        }
+
+        .hero-img {
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(239, 68, 68, 0.2);
+            filter: grayscale(20%) contrast(110%);
+        }
+
+        .admission-form {
+            background: var(--panel-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: #222;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 6px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* --- VIEW 2: WORKOUTS --- */
+        .workout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .workout-card {
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workout-card::before {
+            content: "CLICK TO VIEW";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: 0.3s;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        .workout-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Modal for Workout Details */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--panel-bg);
+            padding: 40px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            border: 1px solid var(--primary);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* --- VIEW 3: PERSONAL TRAINING --- */
+        .trainer-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .trainer-list {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .trainer-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border);
+            cursor: pointer;
+        }
+
+        .trainer-avatar.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        /* --- VIEW 4: STORE --- */
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        /* --- VIEW 5: DASHBOARD --- */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-box {
+            background: linear-gradient(145deg, #1f2026, #18181b);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+        }
+
+        /* --- TOAST NOTIFICATION --- */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: var(--success);
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 3000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {
+                bottom: 0;
+                opacity: 0;
+            }
+
+            to {
+                bottom: 30px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeout {
+            from {
+                bottom: 30px;
+                opacity: 1;
+            }
+
+            to {
+                bottom: 0;
+                opacity: 0;
+            }
+        }
+
+        @media(max-width: 768px) {
+
+            .hero,
+            .trainer-section,
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            /* Simplified mobile nav for demo */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="logo"><i class="fas fa-dumbbell"></i> IRON<span>FORGE</span></div>
+        <div class="nav-links" id="navLinks">
+            <button onclick="navigate('home')" class="nav-btn active">Home</button>
+            <button onclick="navigate('plans')" class="nav-btn" id="navPlans"
+                style="opacity:0.5; pointer-events:none;">Workouts</button>
+            <button onclick="navigate('training')" class="nav-btn" id="navTraining"
+                style="opacity:0.5; pointer-events:none;">Training</button>
+            <button onclick="navigate('store')" class="nav-btn" id="navStore"
+                style="opacity:0.5; pointer-events:none;">Store</button>
+            <button onclick="navigate('dashboard')" class="nav-btn" id="navDash"
+                style="opacity:0.5; pointer-events:none;">Dashboard</button>
+        </div>
+    </nav>
+
+    <!-- VIEW 1: HOME & ADMISSION -->
+    <section id="view-home" class="view-section active">
+        <div class="hero">
+            <div>
+                <h1 style="font-size: 4rem; line-height: 1;">Built for <span
+                        style="color:var(--primary)">Greatness</span></h1>
+                <p style="margin: 20px 0; color: var(--text-muted); font-size: 1.1rem;">
+                    Welcome to IronForge Athletics. We don't just sell memberships; we build legacies.
+                    State-of-the-art equipment, elite coaching, and an environment that demands your best.
+                </p>
+                <div style="display: flex; gap: 20px; margin-bottom: 30px;">
+                    <div><i class="fas fa-check" style="color:var(--primary)"></i> 24/7 Access</div>
+                    <div><i class="fas fa-check" style="color:var(--primary)"></i> Olympic Racks</div>
+                    <div><i class="fas fa-check" style="color:var(--primary)"></i> Sauna</div>
+                </div>
+            </div>
+
+            <!-- ADMISSION FORM -->
+            <div class="admission-form">
+                <h2 style="margin-bottom: 20px;">Start Your Journey</h2>
+                <form id="admissionForm">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="userName" required placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="userEmail" required placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label>Select Plan</label>
+                        <select id="userPlan">
+                            <option value="1">Monthly - ₹1,499</option>
+                            <option value="3">Quarterly - ₹3,999</option>
+                            <option value="12">Yearly - ₹12,999</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Join IronForge</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW 2: WORKOUT PLANS -->
+    <section id="view-plans" class="view-section">
+        <h2 style="text-align: center; margin-bottom: 10px;">Select Your Protocol</h2>
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 40px;">Click a plan to view details and
+            start training.</p>
+
+        <div class="workout-grid">
+            <div class="card workout-card" onclick="openPlanModal('beginner')">
+                <i class="fas fa-seedling" style="font-size: 3rem; color: #22c55e; margin-bottom: 20px;"></i>
+                <h3>Foundation</h3>
+                <p style="color:var(--text-muted)">For Beginners</p>
+            </div>
+            <div class="card workout-card" onclick="openPlanModal('intermediate')">
+                <i class="fas fa-fire" style="font-size: 3rem; color: #f59e0b; margin-bottom: 20px;"></i>
+                <h3>Hypertrophy</h3>
+                <p style="color:var(--text-muted)">Intermediate Split</p>
+            </div>
+            <div class="card workout-card" onclick="openPlanModal('advanced')">
+                <i class="fas fa-skull" style="font-size: 3rem; color: #ef4444; margin-bottom: 20px;"></i>
+                <h3>Iron God</h3>
+                <p style="color:var(--text-muted)">Advanced Powerlifting</p>
+            </div>
+        </div>
+
+        <div
+            style="text-align: center; margin-top: 60px; padding: 40px; background: var(--panel-bg); border-radius: 12px;">
+            <h3>Hit a Plateau?</h3>
+            <p style="margin: 15px 0; color: var(--text-muted);">Our elite coaches can build a custom plan just for you.
+            </p>
+            <button onclick="navigate('training')" class="btn btn-outline">Get Personal Training</button>
+        </div>
+    </section>
+
+    <!-- VIEW 3: PERSONAL TRAINING -->
+    <section id="view-training" class="view-section">
+        <div class="trainer-section">
+            <div>
+                <h2>Book a Session</h2>
+                <p style="color:var(--text-muted); margin-bottom: 30px;">Select a coach and schedule your consultation.
+                </p>
+
+                <form id="ptForm">
+                    <label style="display:block; margin-bottom:10px; color:var(--text-muted)">Select Trainer:</label>
+                    <div class="trainer-list">
+                        <img src="https://images.unsplash.com/photo-1598970434795-0c54fe7c0642?q=80&w=200"
+                            class="trainer-avatar" onclick="selectTrainer(this, 'Arjun')" alt="Trainer 1">
+                        <img src="https://images.unsplash.com/photo-1571907480495-3b21f3926c53?q=80&w=200"
+                            class="trainer-avatar" onclick="selectTrainer(this, 'Isha')" alt="Trainer 2">
+                        <img src="https://images.unsplash.com/photo-1554344728-77cf90d9ed26?q=80&w=200"
+                            class="trainer-avatar" onclick="selectTrainer(this, 'Vikram')" alt="Trainer 3">
+                    </div>
+                    <input type="hidden" id="selectedTrainerName">
+
+                    <div class="form-group">
+                        <label>Preferred Date</label>
+                        <input type="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Goals</label>
+                        <input type="text" placeholder="e.g. Fat loss, Bench Press max">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Confirm Booking</button>
+                </form>
+            </div>
+            <div>
+                <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800"
+                    style="width:100%; border-radius:12px; opacity: 0.8;">
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 50px;">
+            <p style="margin-bottom: 15px;">Need fuel for your sessions?</p>
+            <button onclick="navigate('store')" class="btn btn-outline">Visit Supplement Store</button>
+        </div>
+    </section>
+
+    <!-- VIEW 4: STORE -->
+    <section id="view-store" class="view-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2>Gym Store</h2>
+            <div style="background: #333; padding: 10px 20px; border-radius: 20px;">
+                Cart Total: <span id="cartTotal" style="color:var(--primary); font-weight:bold;">₹0</span>
+            </div>
+        </div>
+
+        <div class="store-grid">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=800" class="product-img">
+                <h4>Isolate Whey</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹2,499</p>
+                <button onclick="addToCart(2499)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1604398419945-3c4c7b1d5ac3?q=80&w=800" class="product-img">
+                <h4>Creatine Mono</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹1,199</p>
+                <button onclick="addToCart(1199)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1570211776066-4f6b1e3ef090?q=80&w=800" class="product-img">
+                <h4>Pre-Workout</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹1,899</p>
+                <button onclick="addToCart(1899)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1550523820-80d125746757?q=80&w=800" class="product-img">
+                <h4>Znic</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹699</p>
+                <button onclick="addToCart(699)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=800" class="product-img">
+                <h4>Fish Oil</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹2,499</p>
+                <button onclick="addToCart(2499)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=800" class="product-img">
+                <h4>Multivitamin</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹2,499</p>
+                <button onclick="addToCart(2499)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=800" class="product-img">
+                <h4>Mass Gainer</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹2,499</p>
+                <button onclick="addToCart(2499)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=800" class="product-img">
+                <h4>Vitamin D3 + K2</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹2,499</p>
+                <button onclick="addToCart(2499)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=800" class="product-img">
+                <h4>Electrolytes</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹2,499</p>
+                <button onclick="addToCart(2499)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=800" class="product-img">
+                <h4>Beta-Alanine</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹2,499</p>
+                <button onclick="addToCart(2499)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=800" class="product-img">
+                <h4>BCAA (Branched Chain Amino Acids)</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹2,499</p>
+                <button onclick="addToCart(2499)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=800" class="product-img">
+                <h4>Glutamine</h4>
+                <p style="color:var(--text-muted); margin: 5px 0;">₹2,499</p>
+                <button onclick="addToCart(2499)" class="btn btn-primary" style="width:100%; font-size: 0.8rem;">Add to
+                    Cart</button>s
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 50px;">
+            <button onclick="navigate('dashboard')" class="btn btn-outline" style="width: 200px;">Go to
+                Dashboard</button>
+        </div>
+    </section>
+
+    <!-- VIEW 5: DASHBOARD -->
+    <section id="view-dashboard" class="view-section">
+        <h2 style="margin-bottom: 30px;">Member Dashboard</h2>
+
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-label">Days Left</div>
+                <div class="stat-number" id="dashDays">0</div>
+                <div style="color: #22c55e; font-size: 0.8rem;">Active Plan</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Current Plan</div>
+                <div class="stat-number" style="font-size: 1.5rem; line-height: 3rem;" id="dashPlan">None</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Joined On</div>
+                <div class="stat-number" style="font-size: 1.5rem; line-height: 3rem;" id="dashDate">-</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Profile Details</h3>
+            <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <p style="color:var(--text-muted)">Member Name</p>
+                    <p style="font-size: 1.2rem; font-weight: bold;" id="dashName">Guest</p>
+                </div>
+                <div>
+                    <p style="color:var(--text-muted)">Upcoming Sessions</p>
+                    <p style="font-size: 1.2rem; font-weight: bold;" id="dashPT">None</p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="logout()" class="btn" style="background: #333; color: white; margin-top: 30px;">Logout</button>
+    </section>
+
+    <!-- WORKOUT MODAL -->
+    <div class="modal-overlay" id="planModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle" style="color: var(--primary);">Title</h2>
+            <div id="modalBody" style="margin-top: 20px; line-height: 1.6;"></div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast">Notification</div>
+
+    <script>
+        // --- 1. GLOBAL STATE & NAVIGATION ---
+        const user = {
+            name: null,
+            email: null,
+            planMonths: 0,
+            startDate: null,
+            ptBooked: false,
+            cartTotal: 0
+        };
+
+        // Workout Data
+        const workouts = {
+            beginner: "<strong>Day 1:</strong> Full Body (Squat, Bench, Row)<br><strong>Day 2:</strong> Cardio 20min<br><strong>Day 3:</strong> Full Body (Deadlift, Overhead Press, Lat Pulldown)",
+            intermediate: "<strong>Mon:</strong> Chest & Tris<br><strong>Tue:</strong> Back & Bis<br><strong>Thu:</strong> Legs & Shoulders<br><strong>Fri:</strong> Upper Body Pump",
+            advanced: "<strong>Week 1:</strong> 1RM Testing<br><strong>Week 2:</strong> Dynamic Effort Squat/Bench<br><strong>Week 3:</strong> Max Effort Deadlift<br><strong>Week 4:</strong> Deload"
+        };
+
+        // Initialize on load
+        window.onload = function () {
+            loadUserFromStorage();
+            if (user.name) {
+                unlockNav();
+                navigate('dashboard'); // If logged in, go to dashboard
+            } else {
+                navigate('home');
+            }
+        };
+
+        function navigate(viewId) {
+            // Hide all sections
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+            // Show target
+            document.getElementById(`view-${viewId}`).classList.add('active');
+
+            // Highlight nav if it exists
+            const navBtn = document.querySelector(`button[onclick="navigate('${viewId}')"]`);
+            if (navBtn) navBtn.classList.add('active');
+
+            // Refresh dashboard if entering it
+            if (viewId === 'dashboard') updateDashboard();
+        }
+
+        function unlockNav() {
+            // Enable buttons
+            ['navPlans', 'navTraining', 'navStore', 'navDash'].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'all';
+            });
+        }
+
+        // --- 2. LOGIC FUNCTIONS ---
+
+        // ADMISSION
+        document.getElementById('admissionForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            user.name = document.getElementById('userName').value;
+            user.email = document.getElementById('userEmail').value;
+            user.planMonths = parseInt(document.getElementById('userPlan').value);
+            user.startDate = new Date().toISOString();
+
+            saveUser();
+            unlockNav();
+            showToast(`Welcome to the IronForge family, ${user.name}!`);
+            setTimeout(() => navigate('plans'), 1500); // Auto-navigate to next step
+        });
+
+        // WORKOUT MODAL
+        function openPlanModal(type) {
+            document.getElementById('modalTitle').innerText = type.toUpperCase() + " PLAN";
+            document.getElementById('modalBody').innerHTML = workouts[type];
+            document.getElementById('planModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('planModal').style.display = 'none';
+        }
+
+        // TRAINER SELECTION
+        function selectTrainer(img, name) {
+            document.querySelectorAll('.trainer-avatar').forEach(el => el.classList.remove('selected'));
+            img.classList.add('selected');
+            document.getElementById('selectedTrainerName').value = name;
+        }
+
+        document.getElementById('ptForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const trainer = document.getElementById('selectedTrainerName').value;
+            if (!trainer) { showToast('Please select a trainer first!'); return; }
+
+            user.ptBooked = `Session with ${trainer}`;
+            saveUser();
+            showToast('Session Booked! Redirecting to Store...');
+            setTimeout(() => navigate('store'), 1500);
+        });
+
+        // STORE
+        function addToCart(price) {
+            user.cartTotal += price;
+            document.getElementById('cartTotal').innerText = "₹" + user.cartTotal;
+            showToast("Item added to cart");
+            saveUser();
+        }
+
+        // DASHBOARD CALCULATIONS
+        function updateDashboard() {
+            if (!user.startDate) return;
+
+            const start = new Date(user.startDate);
+            const now = new Date();
+            const end = new Date(start);
+            end.setMonth(end.getMonth() + user.planMonths);
+
+            // Calculate days left
+            const diffTime = Math.abs(end - now);
+            const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            document.getElementById('dashDays').innerText = daysLeft;
+            document.getElementById('dashName').innerText = user.name;
+            document.getElementById('dashDate').innerText = start.toLocaleDateString();
+            document.getElementById('dashPlan').innerText = user.planMonths === 1 ? "Monthly" : (user.planMonths === 12 ? "Yearly" : "Quarterly");
+            document.getElementById('dashPT').innerText = user.ptBooked ? user.ptBooked : "No Sessions Booked";
+        }
+
+        // --- 3. UTILITIES & STORAGE ---
+        function saveUser() {
+            localStorage.setItem('ironForgeUser', JSON.stringify(user));
+        }
+
+        function loadUserFromStorage() {
+            const stored = localStorage.getItem('ironForgeUser');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                // Merge to keep object structure
+                Object.assign(user, parsed);
+                document.getElementById('cartTotal').innerText = "₹" + user.cartTotal;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('ironForgeUser');
+            location.reload();
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById("toast");
+            t.innerText = msg;
+            t.className = "show";
+            setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
+        }
+
+        // Close modal on outside click
+        window.onclick = function (event) {
+            if (event.target == document.getElementById('planModal')) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+
+</html>
